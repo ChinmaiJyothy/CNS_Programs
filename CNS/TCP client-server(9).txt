@@ -1,0 +1,93 @@
+FileClient.java
+
+
+import java.io.*;
+import java.net.*;
+public class FileClient
+{
+	public static void main(String[] args)
+	{
+		new FileClient();
+	}
+	public FileClient()
+	{
+		BufferedReader bufReader = new BufferedReader(new InputStreamReader(System.in)); 
+		try
+		{
+			System.out.println("Enter the IP Address of the Server:");
+			String saddr = bufReader.readLine();
+			Socket clientSocket = new Socket(saddr,8000);
+			System.out.println("Conecting server----");
+			DataInputStream input = new DataInputStream(clientSocket.getInputStream());
+			DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+			System.out.println("Enter File Name:");
+			String Name = bufReader.readLine();
+			output.writeUTF(Name);
+			String EchoedFile = input.readUTF();
+			System.out.println("---------");
+			System.out.println("Content of File:\n\n" + EchoedFile);
+			clientSocket.close();
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+}
+
+
+FileServer.java
+
+
+import java.io.*;
+import java.net.*;
+public class FileServer
+{
+	public static void main(String[] args)
+	{
+		new FileServer();
+	}
+	public FileServer()
+	{
+		BufferedReader bufReader = new BufferedReader(new InputStreamReader(System.in)); 
+		try
+		{
+			
+			ServerSocket serversocket = new ServerSocket(8000);
+			String everything;
+			System.out.println("Server Started-----");
+			System.out.println("-------------------");
+			Socket socket = serversocket.accept();
+			DataInputStream input = new DataInputStream(socket.getInputStream());
+			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+			String str = input.readUTF();
+			System.out.println("Request File Name:"+str);
+			System.out.println("-------------------");
+			try
+			{
+				InputStream in = new FileInputStream(str);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in)); 
+				StringBuilder out = new StringBuilder();
+				
+				String line;
+				System.out.println("Reading Contents of the File");
+				System.out.println("-------------------");
+				while((line=reader.readLine())!=null)
+				{
+					out.append(line+"\n");
+				}
+				everything = out.toString();
+				System.out.println("File Contents sent to client----");
+			}
+			catch(Exception ex)
+			{
+				everything="File Not Found!";
+			}
+			output.writeUTF(everything);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+}
